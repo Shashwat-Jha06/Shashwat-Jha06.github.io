@@ -34,6 +34,23 @@
             z-index: -1000;
             object-fit: cover;
             filter: blur(3px);
+            /* Add fallback image styles */
+            background-image: url('assets/video-fallback.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Improve video playback for mobile */
+        @media (max-width: 768px) {
+            #background-video {
+                /* Ensure video doesn't overflow */
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                /* Prevent video autoplay restrictions */
+                pointer-events: none;
+            }
         }
 
         /* Optional overlay to darken the video */
@@ -1008,10 +1025,20 @@
     </style>
 </head>
 <body>
-    <video autoplay muted loop id="background-video">
-        <source src="assets\istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+    <video 
+    id="background-video" 
+    autoplay 
+    muted 
+    loop 
+    playsinline 
+    webkit-playsinline
+    preload="metadata"
+    poster="assets/video-fallback.jpg"
+>
+    <source src="assets/istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
+    <img src="assets/video-fallback.png" alt="Background" style="width: 100%; height: 100%; object-fit: cover;">
+    Your browser does not support the video tag.
+</video>
     
     <!-- Navbar -->
     <nav class="navbar">
@@ -1988,7 +2015,41 @@
                     });
                 });
             });
+
+    // Ensure video plays on mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('background-video');
             
+            // Try to play video with muted autoplay
+            const playVideo = () => {
+                if (video) {
+                        video.muted = true;
+                        video.autoplay = true;
+                        video.playsInline = true;
+                        
+                        // Attempt to play
+                        const playPromise = video.play();
+                        
+                        // Handle potential errors
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log('Autoplay was prevented:', error);
+                                // Fallback to background image if video fails
+                                video.style.backgroundImage = 'url(assets/video-fallback.jpg)';
+                                video.style.backgroundSize = 'cover';
+                                video.style.backgroundPosition = 'center';
+                            });
+                        }
+                    }
+                };
+
+                // Try to play video
+                playVideo();
+
+                // Additional mobile compatibility
+                document.addEventListener('touchstart', playVideo, {once: true});
+            });
+
             // Scroll to top functionality
             scrollTopBtn.addEventListener('click', function() {
                 window.scrollTo({
