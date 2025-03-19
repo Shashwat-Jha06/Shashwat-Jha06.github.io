@@ -53,8 +53,8 @@
             height: 100%;
             object-fit: cover;
             filter: blur(3px);
-            z-index: -1000;  /* Initially behind everything */
-            opacity: 0;       /* Initially invisible */
+            z-index: 500;  /* Initially behind everything */
+            opacity: 50;       /* Initially invisible */
             transition: opacity 0.5s ease, z-index 0s 0.5s;  /* Smooth transition */
         }
 
@@ -2068,7 +2068,7 @@
                         
                         // Add 4-second loop
                         video.addEventListener('timeupdate', function loopHandler() {
-                            if (video.currentTime > 4) {
+                            if (video.currentTime > 6) {
                                 video.currentTime = 0;
                             }
                         });
