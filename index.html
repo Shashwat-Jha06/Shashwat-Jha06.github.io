@@ -30,6 +30,9 @@
         min-width: 100%;
         min-height: 100%;
         width: auto;
+        object-position: bottom right; /* Focus on bottom right */
+        transform: scale(1.5); /* Zoom */
+        transform-origin: bottom right;
         height: auto;
         z-index: -1000;
         object-fit: cover;
@@ -1045,7 +1048,7 @@
         preload="metadata"
         poster="assets/video-fallback.png"
     >
-        <source src="assets/istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
+        <source src="assets\istockphoto-1297221889-640_adpp_is (online-video-cutter.com) (2).mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
@@ -2031,7 +2034,7 @@
                 });
             });
 
-    // Ensure video plays on mobile
+        // Ensure video plays on mobile
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('background-video');
             const fallbackImage = document.getElementById('video-fallback');
@@ -2044,7 +2047,14 @@
                     const playPromise = video.play();
                     
                     if (playPromise !== undefined) {
-                        playPromise.catch(error => {
+                        playPromise.then(() => {
+                            // Setup 4-second loop after successful play
+                            video.addEventListener('timeupdate', function loopHandler() {
+                                if (video.currentTime > 4) {
+                                    video.currentTime = 0;
+                                }
+                            });
+                        }).catch(error => {
                             console.log('Autoplay was prevented:', error);
                             // Show fallback image if video fails
                             video.classList.add('video-error');
@@ -2075,6 +2085,11 @@
             video.addEventListener('error', () => {
                 video.classList.add('video-error');
                 fallbackImage.classList.add('show');
+            });
+
+            // Ensure video starts at the beginning when loaded
+            video.addEventListener('loadedmetadata', () => {
+                video.currentTime = 0;
             });
         });
 
