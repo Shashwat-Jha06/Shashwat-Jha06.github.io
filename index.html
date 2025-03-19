@@ -2046,67 +2046,70 @@
             const video = document.getElementById('background-video');
             const fallbackImage = document.getElementById('video-fallback');
 
-            // Function to display the fallback image
+            // Chrome-specific fallback mechanism
             const showFallback = () => {
-                video.classList.add('video-error');
-                fallbackImage.classList.add('show');
+                video.style.display = 'none';
+                fallbackImage.style.display = 'block';
+                fallbackImage.style.opacity = '1';
+                fallbackImage.style.zIndex = '1000';
             };
 
-            // Function to attempt to play the video
             const playVideo = () => {
-                if (!video) {
-                    showFallback();
-                    return;
-                }
-
+                // Ensure video is muted (critical for Chrome autoplay)
                 video.muted = true;
 
+                // Attempt to play
                 const playPromise = video.play();
 
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
-                        // Ensure looping after 4 seconds
+                        // Successful play
+                        fallbackImage.style.display = 'none';
+                        
+                        // Add 4-second loop
                         video.addEventListener('timeupdate', function loopHandler() {
                             if (video.currentTime > 4) {
                                 video.currentTime = 0;
                             }
-                        }, { once: true });
-                    }).catch(() => {
-                        // Immediately show the fallback if autoplay fails
+                        });
+                    }).catch((error) => {
+                        console.error('Autoplay prevented:', error);
                         showFallback();
                     });
-
-                    // Ensure fallback is shown if the video doesn't start playing within 1 second
-                    setTimeout(() => {
-                        if (video.paused || video.ended) {
-                            showFallback();
-                        }
-                    }, 1000);
                 } else {
                     showFallback();
                 }
             };
 
+            // Chrome-specific interaction handlers
+            const interactionEvents = ['click', 'touchstart', 'scroll'];
+            interactionEvents.forEach(eventType => {
+                document.addEventListener(eventType, function interactionHandler(e) {
+                    // Prevent default to help with mobile interactions
+                    e.preventDefault();
+                    
+                    // Try to play video
+                    playVideo();
+                    
+                    // Remove listener after first interaction
+                    document.removeEventListener(eventType, interactionHandler);
+                }, { passive: false });
+            });
+
             // Initial play attempt
             playVideo();
 
-            // Retry on user interaction
-            ['touchstart', 'click', 'scroll'].forEach(eventType => {
-                document.addEventListener(eventType, () => {
-                    if (video.classList.contains('video-error')) return;
-                    playVideo();
-                }, { once: false });
-            });
-
-            // Handle unsupported video formats
-            if (!video || !video.canPlayType('video/mp4')) {
-                showFallback();
-            }
-
-            // Handle video load errors
+            // Fallback triggers
             video.addEventListener('error', showFallback);
+            
+            // Timeout fallback
+            setTimeout(() => {
+                if (video.paused || video.readyState < 2) {
+                    showFallback();
+                }
+            }, 2000);
 
-            // Ensure the video starts at the beginning when loaded
+            // Ensure video starts at beginning
             video.addEventListener('loadedmetadata', () => {
                 video.currentTime = 0;
             });
