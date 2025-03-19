@@ -53,11 +53,16 @@
             height: 100%;
             object-fit: cover;
             filter: blur(3px);
-            z-index: -1000;
+            z-index: -1000;  /* Initially behind everything */
+            opacity: 0;       /* Initially invisible */
+            transition: opacity 0.5s ease, z-index 0s 0.5s;  /* Smooth transition */
         }
 
         #video-fallback.show {
             display: block;
+            z-index: 1000;     /* Bring it to the front */
+            opacity: 1;        /* Fade in effect */
+            transition: opacity 0.5s ease, z-index 0s;  /* Immediate z-index change */
         }
 
         @media (max-width: 768px) {
@@ -2034,33 +2039,48 @@
                 });
             });
 
-        // Ensure video plays on mobile
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const video = document.getElementById('background-video');
             const fallbackImage = document.getElementById('video-fallback');
 
-            // Attempt to play video
+            // Function to display the fallback image
+            const showFallback = () => {
+                video.classList.add('video-error');
+                fallbackImage.classList.add('show');
+            };
+
+            // Function to attempt to play the video
             const playVideo = () => {
-                if (video) {
-                    video.muted = true;
-                    
-                    const playPromise = video.play();
-                    
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            // Setup 4-second loop after successful play
-                            video.addEventListener('timeupdate', function loopHandler() {
-                                if (video.currentTime > 4) {
-                                    video.currentTime = 0;
-                                }
-                            });
-                        }).catch(error => {
-                            console.log('Autoplay was prevented:', error);
-                            // Show fallback image if video fails
-                            video.classList.add('video-error');
-                            fallbackImage.classList.add('show');
-                        });
-                    }
+                if (!video) {
+                    showFallback();
+                    return;
+                }
+
+                video.muted = true;
+
+                const playPromise = video.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // Ensure looping after 4 seconds
+                        video.addEventListener('timeupdate', function loopHandler() {
+                            if (video.currentTime > 4) {
+                                video.currentTime = 0;
+                            }
+                        }, { once: true });
+                    }).catch(() => {
+                        // Immediately show the fallback if autoplay fails
+                        showFallback();
+                    });
+
+                    // Ensure fallback is shown if the video doesn't start playing within 1 second
+                    setTimeout(() => {
+                        if (video.paused || video.ended) {
+                            showFallback();
+                        }
+                    }, 1000);
+                } else {
+                    showFallback();
                 }
             };
 
@@ -2075,19 +2095,15 @@
                 }, { once: false });
             });
 
-            // Fallback for browsers that don't support video
-            if (!video.canPlayType('video/mp4')) {
-                video.classList.add('video-error');
-                fallbackImage.classList.add('show');
+            // Handle unsupported video formats
+            if (!video || !video.canPlayType('video/mp4')) {
+                showFallback();
             }
 
             // Handle video load errors
-            video.addEventListener('error', () => {
-                video.classList.add('video-error');
-                fallbackImage.classList.add('show');
-            });
+            video.addEventListener('error', showFallback);
 
-            // Ensure video starts at the beginning when loaded
+            // Ensure the video starts at the beginning when loaded
             video.addEventListener('loadedmetadata', () => {
                 video.currentTime = 0;
             });
