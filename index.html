@@ -24,35 +24,45 @@
         
         /* Background Video Styles */
         #background-video {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        z-index: -1000;
+        object-fit: cover;
+        filter: blur(3px);
+        }
+
+        /* Fallback image styling */
+        #background-video.video-error {
+            display: none;
+        }
+
+        #video-fallback {
+            display: none;
             position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: -1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             filter: blur(3px);
-            /* Add fallback image styles */
-            background-image: url('assets/video-fallback.jpg');
-            background-size: cover;
-            background-position: center;
+            z-index: -1000;
         }
 
-        /* Improve video playback for mobile */
+        #video-fallback.show {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             #background-video {
-                /* Ensure video doesn't overflow */
                 width: 100%;
                 height: 100%;
-                top: 0;
-                left: 0;
-                /* Prevent video autoplay restrictions */
-                pointer-events: none;
             }
         }
-
         /* Optional overlay to darken the video */
         body::before {
             content: "";
@@ -1025,20 +1035,25 @@
     </style>
 </head>
 <body>
-    <video 
-    id="background-video" 
-    autoplay 
-    muted 
-    loop 
-    playsinline 
-    webkit-playsinline
-    preload="metadata"
-    poster="assets/video-fallback.jpg"
->
-    <source src="assets/istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
-    <img src="assets/video-fallback.png" alt="Background" style="width: 100%; height: 100%; object-fit: cover;">
-    Your browser does not support the video tag.
-</video>
+        <video 
+        id="background-video" 
+        autoplay 
+        muted 
+        loop 
+        playsinline 
+        webkit-playsinline
+        preload="metadata"
+        poster="assets/video-fallback.png"
+    >
+        <source src="assets/istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <img 
+        id="video-fallback" 
+        src="assets/video-fallback.png" 
+        alt="Background Fallback"
+    >
     
     <!-- Navbar -->
     <nav class="navbar">
@@ -2019,36 +2034,49 @@
     // Ensure video plays on mobile
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('background-video');
-            
-            // Try to play video with muted autoplay
+            const fallbackImage = document.getElementById('video-fallback');
+
+            // Attempt to play video
             const playVideo = () => {
                 if (video) {
-                        video.muted = true;
-                        video.autoplay = true;
-                        video.playsInline = true;
-                        
-                        // Attempt to play
-                        const playPromise = video.play();
-                        
-                        // Handle potential errors
-                        if (playPromise !== undefined) {
-                            playPromise.catch(error => {
-                                console.log('Autoplay was prevented:', error);
-                                // Fallback to background image if video fails
-                                video.style.backgroundImage = 'url(assets/video-fallback.jpg)';
-                                video.style.backgroundSize = 'cover';
-                                video.style.backgroundPosition = 'center';
-                            });
-                        }
+                    video.muted = true;
+                    
+                    const playPromise = video.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.log('Autoplay was prevented:', error);
+                            // Show fallback image if video fails
+                            video.classList.add('video-error');
+                            fallbackImage.classList.add('show');
+                        });
                     }
-                };
+                }
+            };
 
-                // Try to play video
-                playVideo();
+            // Initial play attempt
+            playVideo();
 
-                // Additional mobile compatibility
-                document.addEventListener('touchstart', playVideo, {once: true});
+            // Retry on user interaction
+            ['touchstart', 'click', 'scroll'].forEach(eventType => {
+                document.addEventListener(eventType, () => {
+                    if (video.classList.contains('video-error')) return;
+                    playVideo();
+                }, { once: false });
             });
+
+            // Fallback for browsers that don't support video
+            if (!video.canPlayType('video/mp4')) {
+                video.classList.add('video-error');
+                fallbackImage.classList.add('show');
+            }
+
+            // Handle video load errors
+            video.addEventListener('error', () => {
+                video.classList.add('video-error');
+                fallbackImage.classList.add('show');
+            });
+        });
 
             // Scroll to top functionality
             scrollTopBtn.addEventListener('click', function() {
