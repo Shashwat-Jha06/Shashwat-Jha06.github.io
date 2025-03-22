@@ -23,29 +23,25 @@
         }
         
         /* Background Video Styles */
+/* Background Video Styles */
         #background-video {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        min-width: 100%;
-        min-height: 100%;
-        width: auto;
-        object-position: bottom right; /* Focus on bottom right */
-        transform: scale(1.5); /* Zoom */
-        transform-origin: bottom right;
-        height: auto;
-        z-index: -1000;
-        object-fit: cover;
-        filter: blur(3px);
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            object-position: bottom right;
+            transform: scale(1.5);
+            transform-origin: bottom right;
+            height: auto;
+            z-index: -1000;
+            object-fit: cover;
+            filter: blur(3px);
         }
 
-        /* Fallback image styling */
-        #background-video.video-error {
-            display: none;
-        }
-
-        #video-fallback {
-            display: none;
+        /* Background Image Style */
+        #background-image {
             position: fixed;
             top: 0;
             left: 0;
@@ -53,26 +49,8 @@
             height: 100%;
             object-fit: cover;
             filter: blur(3px);
-            z-index: 500;  /* Initially behind everything */
-            opacity: 50;       /* Initially invisible */
-            transition: opacity 0.5s ease, z-index 0s 0.5s;  /* Smooth transition */
-        }
-
-        #video-fallback.show {
-            display: block;
-            z-index: 1000;     /* Bring it to the front */
-            opacity: 1;        /* Fade in effect */
-            transition: opacity 0.5s ease, z-index 0s;  /* Immediate z-index change */
-        }
-        #background-video.video-error {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            #background-video {
-                width: 100%;
-                height: 100%;
-            }
+            z-index: -1000;
+            display: none; /* Hidden by default, shown only on mobile/tablet */
         }
         /* Optional overlay to darken the video */
         body::before {
@@ -1046,7 +1024,7 @@
     </style>
 </head>
 <body>
-        <video 
+    <video 
         id="background-video" 
         autoplay 
         muted 
@@ -1054,16 +1032,15 @@
         playsinline 
         webkit-playsinline
         preload="metadata"
-        poster="assets/video-fallback.png"
     >
-        <source src="assets\istockphoto-1297221889-640_adpp_is (online-video-cutter.com) (2).mp4" type="video/mp4">
+        <source src="assets\istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
     <img 
-        id="video-fallback" 
+        id="background-image" 
         src="assets/video-fallback.png" 
-        alt="Background Fallback"
+        alt="Background Image"
     >
     
     <!-- Navbar -->
@@ -2042,78 +2019,72 @@
                 });
             });
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const video = document.getElementById('background-video');
-            const fallbackImage = document.getElementById('video-fallback');
-
-            // Chrome-specific fallback mechanism
-            const showFallback = () => {
-                video.style.display = 'none';
-                fallbackImage.style.display = 'block';
-                fallbackImage.style.opacity = '1';
-                fallbackImage.style.zIndex = '1000';
-            };
-
-            const playVideo = () => {
-                // Ensure video is muted (critical for Chrome autoplay)
-                video.muted = true;
-
-                // Attempt to play
-                const playPromise = video.play();
-
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // Successful play
-                        fallbackImage.style.display = 'none';
+            (function() {
+                // DOM elements
+                const video = document.getElementById('background-video');
+                const image = document.getElementById('background-image');
+                
+                function setupBackgrounds() {
+                    // Use a simpler detection for mobile devices based only on screen width
+                    const isMobile = window.innerWidth <= 768;
+                    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+                    
+                    if (isMobile || isTablet) {
+                        // Mobile or tablet device detected
+                        console.log('Mobile or tablet detected - showing image background');
                         
-                        // Add 4-second loop
-                        video.addEventListener('timeupdate', function loopHandler() {
-                            if (video.currentTime > 6) {
-                                video.currentTime = 0;
+                        // Hide video, show image
+                        if (video) video.style.display = 'none';
+                        if (image) image.style.display = 'block';
+                    } else {
+                        // Desktop device detected
+                        console.log('Desktop detected - showing video background');
+                        
+                        // Show video, hide image
+                        if (image) image.style.display = 'none';
+                        if (video) {
+                            video.style.display = 'block';
+                            
+                            // Try to play the video
+                            try {
+                                const playPromise = video.play();
+                                
+                                if (playPromise !== undefined) {
+                                    playPromise.catch(error => {
+                                        console.error('Video autoplay failed:', error);
+                                        // Fallback to image if video fails
+                                        video.style.display = 'none';
+                                        image.style.display = 'block';
+                                    });
+                                }
+                                
+                                // Add 6-second loop for the video
+                                video.addEventListener('timeupdate', function() {
+                                    if (video.currentTime > 6) {
+                                        video.currentTime = 0;
+                                    }
+                                });
+                            } catch (err) {
+                                console.error('Error playing video:', err);
+                                // Fallback to image on error
+                                video.style.display = 'none';
+                                image.style.display = 'block';
                             }
-                        });
-                    }).catch((error) => {
-                        console.error('Autoplay prevented:', error);
-                        showFallback();
-                    });
+                        }
+                    }
+                }
+                
+                // Initial setup when DOM is fully loaded
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', setupBackgrounds);
                 } else {
-                    showFallback();
+                    // DOM already loaded
+                    setupBackgrounds();
                 }
-            };
-
-            // Chrome-specific interaction handlers
-            const interactionEvents = ['click', 'touchstart', 'scroll'];
-            interactionEvents.forEach(eventType => {
-                document.addEventListener(eventType, function interactionHandler(e) {
-                    // Prevent default to help with mobile interactions
-                    e.preventDefault();
-                    
-                    // Try to play video
-                    playVideo();
-                    
-                    // Remove listener after first interaction
-                    document.removeEventListener(eventType, interactionHandler);
-                }, { passive: false });
-            });
-
-            // Initial play attempt
-            playVideo();
-
-            // Fallback triggers
-            video.addEventListener('error', showFallback);
-            
-            // Timeout fallback
-            setTimeout(() => {
-                if (video.paused || video.readyState < 2) {
-                    showFallback();
-                }
-            }, 2000);
-
-            // Ensure video starts at beginning
-            video.addEventListener('loadedmetadata', () => {
-                video.currentTime = 0;
-            });
-        });
+                
+                // Handle window resize
+                window.addEventListener('resize', setupBackgrounds);
+            })();
 
             // Scroll to top functionality
             scrollTopBtn.addEventListener('click', function() {
