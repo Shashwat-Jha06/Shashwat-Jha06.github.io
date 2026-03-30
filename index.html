@@ -11,68 +11,43 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Arial', 'Segoe UI', sans-serif;
             scroll-behavior: smooth;
         }
         
         body {
-            background-color: #000;
+            background: linear-gradient(135deg, #010510 0%, #0a0f1a 100%);
             color: #fff;
             line-height: 1.6;
             position: relative;
         }
         
-        /* Background Video Styles */
-/* Background Video Styles */
-        #background-video {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            object-position: bottom right;
-            transform: scale(1.5);
-            transform-origin: bottom right;
-            height: auto;
-            z-index: -1000;
-            object-fit: cover;
-            filter: blur(3px);
-        }
-
-        /* Background Image Style */
-        #background-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(3px);
-            z-index: -1000;
-            display: none; /* Hidden by default, shown only on mobile/tablet */
-        }
-        /* Optional overlay to darken the video */
         body::before {
-            content: "";
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.637);
-            z-index: -999;
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(1px);
+            pointer-events: none;
+            z-index: -1;
         }
         
-        body::after {
-            content: "";
+        body {
+            overflow-x: hidden;
+        }
+        
+        /* Neural Network Background Canvas */
+        #neural-background {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            backdrop-filter: blur(4px);
             z-index: -1;
+            pointer-events: none;
         }
         
         a {
@@ -116,10 +91,14 @@
         }
         
         .section-title h2 {
-            font-size: clamp(24px, 5vw, 36px); /* Responsive font size */
-            color: #fff;
+            font-size: clamp(32px, 5vw, 48px);
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
             margin-top: 10px;
+            font-weight: bold;
         }
         
         .section-title p {
@@ -137,10 +116,12 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            background: rgba(2, 8, 23, 0.8);
+            backdrop-filter: blur(10px);
             padding: 5px 0;
             z-index: 1000;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         .nav-container {
@@ -174,8 +155,24 @@
             white-space: nowrap;
         }
         
-        .nav-links a:hover, .nav-links a.active {
-            color: #ddd;
+        .nav-links a:hover {
+            color: #60a5fa;
+        }
+        
+        .nav-links a.active {
+            color: #60a5fa;
+            position: relative;
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            border-radius: 2px;
         }
         
         /* Home Section - UPDATED */
@@ -183,7 +180,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding-top: 80px; /* Increased from 60px to prevent navbar overlap */
+            padding-top: 80px;
             padding-bottom: 30px;
         }
 
@@ -199,28 +196,79 @@
             flex: 1;
             min-width: 250px;
             padding-right: clamp(10px, 3vw, 30px);
-            padding-top: 0; /* Removed inconsistent padding */
+            padding-top: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-bottom: 20px;
+            margin-top: 80px;
+            position: relative;
         }
 
         .photo-frame {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 20px;
+            position: relative;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .photo-frame-inner {
             width: 100%;
-            max-width: 300px;
-            height: auto;
-            border: 5px solid #fff;
-            border-radius: 5px;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%);
+            border: 0.5px solid rgba(59, 130, 246, 0.5);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            margin-bottom: 15px;
-            aspect-ratio: 1 / 1.13; /* Maintain aspect ratio */
+            position: relative;
+        }
+
+        .photo-frame-inner::before {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            animation: rotate 60s linear infinite;
         }
 
         .photo-frame img {
-            width: 100%;
-            height: 100%;
+            width: 80%;
+            height: 80%;
             object-fit: cover;
+            object-position: center 60%;
+            border-radius: 50%;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-name {
+            text-align: center;
+            font-size: clamp(26px, 4vw, 34px);
+            font-weight: bold;
+            margin: 20px 0 15px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .social-icons {
@@ -232,12 +280,14 @@
 
         .social-icon {
             font-size: clamp(24px, 4vw, 35px);
-            color: #fff;
-            transition: color 0.3s ease;
+            color: #93c5fd;
+            transition: all 0.3s ease;
         }
 
         .social-icon:hover {
-            color: #0088cc;
+            color: #60a5fa;
+            transform: translateY(-3px) scale(1.1);
+            filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4));
         }
 
         .intro-text {
@@ -246,17 +296,60 @@
             margin-top: 0; /* Removed inconsistent margin */
         }
 
-        .intro-text h1 {
-            margin-top: 0; /* Removed inconsistent top margin */
-            font-size: clamp(24px, 4vw, 30px);
-            margin-bottom: 20px;
-            color: #fff;
+        .role-text-container {
+            text-align: center;
+            margin: 40px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 30px;
+            background: rgba(17, 24, 39, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+        }
+
+        .role-text {
+            font-size: clamp(24px, 4vw, 36px);
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            animation: fadeInOut 2s ease-in-out;
+            opacity: 0;
+        }
+
+        .role-text.active {
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            10% { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+            90% { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
         }
 
         .intro-text p {
-            font-size: clamp(14px, 2.5vw, 18px);
+            font-size: clamp(15px, 2.5vw, 18px);
             margin-bottom: 15px;
-            color: #fffdfd;
+            color: #d1d5db;
+            line-height: 1.8;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
         }
         
         /* Skills Section */
@@ -268,8 +361,20 @@
         
         .skill-category {
             margin-bottom: 20px;
+            background: rgba(17, 24, 39, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
         }
-        
+
+        .skill-category:hover {
+            border-color: rgba(147, 51, 234, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.2);
+        }
+
         .skill-category h3 {
             font-size: clamp(18px, 3vw, 22px); /* Responsive font size */
             margin-bottom: 15px;
@@ -308,31 +413,42 @@
         }
         
         .skill-tag {
-            background-color: #504e4e8a;
-            color: #f7f2f2;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: clamp(14px, 2.5vw, 18px); /* Responsive font size */
-            transition: background-color 0.3s;
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: clamp(14px, 2.5vw, 16px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
             margin: 0 5px 5px 0;
+            display: inline-block;
         }
         
         .skill-tag:hover {
-            background-color: #1a1919ab;
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
         /* Experience Section */
         .experience-item {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 50px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+            padding: 24px;
+            background: rgba(17, 24, 39, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .experience-item:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.15);
         }
         
-        .experience-item:last-child {
-            border-bottom: none;
-        }
         
         .experience-image {
             flex: 1;
@@ -345,7 +461,7 @@
         .experience-image img {
             width: 100%;
             max-width: 200px;
-            height: auto;
+            height: 150px;
             object-fit: contain;
             border-radius: 5px;
         }
@@ -404,14 +520,21 @@
         .project-item {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 50px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+            padding: 24px;
+            background: rgba(17, 24, 39, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .project-item:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.15);
         }
         
-        .project-item:last-child {
-            border-bottom: none;
-        }
         
         .project-image {
             flex: 1;
@@ -515,9 +638,19 @@
         .publication-item {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 50px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #ffffff;
+            margin-bottom: 30px;
+            padding: 24px;
+            background: rgba(17, 24, 39, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .publication-item:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.15);
         }
         
         .publication-item:last-child {
@@ -610,13 +743,19 @@
         .volunteering-item, .leadership-item {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 50px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+            padding: 24px;
+            background: rgba(17, 24, 39, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
         
-        .volunteering-item:last-child, .leadership-item:last-child {
-            border-bottom: none;
+        .volunteering-item:hover, .leadership-item:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.15);
         }
         
         .volunteering-image, .leadership-image {
@@ -812,6 +951,28 @@
         .social-link:hover {
             color: #0088cc;
             transform: translateY(-5px);
+        }
+
+        .job-status {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(14px, 2.5vw, 16px);
+            color: #ffffff;
+            min-height: 50px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            line-height: 1.4;
+        }
+
+        .job-status-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: #ffffff;
+            margin-left: 2px;
+            animation: blink-caret 0.75s step-end infinite;
+            vertical-align: middle;
         }
 
         .led-matrix-container {
@@ -1024,24 +1185,8 @@
     </style>
 </head>
 <body>
-    <video 
-        id="background-video" 
-        autoplay 
-        muted 
-        loop 
-        playsinline 
-        webkit-playsinline
-        preload="metadata"
-    >
-        <source src="assets\istockphoto-1297221889-640_adpp_is (online-video-cutter.com).mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-
-    <img 
-        id="background-image" 
-        src="assets/video-fallback.png" 
-        alt="Background Image"
-    >
+    <!-- Neural Network Background -->
+    <canvas id="neural-background"></canvas>
     
     <!-- Navbar -->
     <nav class="navbar">
@@ -1065,9 +1210,15 @@
         <div class="container">
             <div class="profile-section">
                 <div class="profile-photo">
-                    <div class="photo-frame">
-                        <img src="assets\IMG_4698.jpeg" alt="Your Photo">
+                    <div class="job-status">
+                        <span id="job-status-text"></span><span class="job-status-cursor"></span>
                     </div>
+                    <div class="photo-frame">
+                        <div class="photo-frame-inner">
+                            <img src="assets\IMG_4698.jpeg" alt="Shashwat Jha">
+                        </div>
+                    </div>
+                    <h2 class="profile-name">Shashwat Jha</h2>
                     <div class="social-icons">
                         <a href="https://github.com/Shashwat-Jha06" class="social-icon" target="_blank" title="GitHub">
                             <i class="fab fa-github"></i>
@@ -1082,15 +1233,14 @@
                             <i class="fas fa-envelope"></i>
                         </a>
                     </div>
-                    <div class="led-matrix-container">
-                        <div class="led-matrix" id="led-matrix"> Actively seeking Internships for Summer'25!</div>
-                    </div>
                 </div>
                 <div class="intro-text">
-                    <h1>Hi! I'm Shashwat 👋</h1>
-                    <p>I am a <b>Master's student in Computer Science and Engineering</b> at the <b>University of California, Riverside</b>,
-                        where I recently started as a <b>Student Researcher</b> under <b>Prof. Amit K. Roy-Chowdhury</b> and collaborating with <b>Prof. Hang Qiu</b>. My research focuses on <b>Uncertainty Quantification in Computer Vision, safety alignment and hallucinations in Vision-Language Models, as well as multi-agent perception in autonomous vehicles</b>.</p>
-                    <p>Previously, I worked as a <b>Data Scientist</b> for a year at <b>Axio</b> (formerly Capital Float), a leading digital lender in India backed by the likes of Amazon, Peak XV (Sequoia Capital) and more. Before that, I had spent 6 months as an <b>Intern at Bain & Company in the BCN division</b>, contributing to AI-driven solution for global clients which led to a Full-time Offer </p>
+                    <div class="role-text-container">
+                        <h1 class="role-text" id="role-text"></h1>
+                    </div>
+                    <p>I am an <b> AI Engineer at Altimetrik </B> and a New Graduate with MS in Computer Science and Engineering from the <b>University of California, Riverside</b>,
+                        where I was a <b>Student Researcher</b> under <b>Prof. Amit K. Roy-Chowdhury.</b></p>
+                    <p>Previously, I worked as a <b>Data Scientist</b> for a year at <b>Axio</b> (Acquired by Amazon), a leading digital lender in India backed by the likes of  Peak XV (Sequoia Capital) and more. Before that, I had spent 6 months as an <b>Intern at Bain & Company in the BCN division</b>, contributing to AI-driven solution for global clients which led to a Full-time Offer </p>
                     <p>I was also a </b>Student Research Scholar</b> at the <b>Artificial Intelligence Institute – University of South Carolina (AIISC)</b>, where I worked with <b>Dr. Amit Sheth, Dr. Amitava Das, and Aman Chadha</b>.</p>
                     <p>I completed my undergraduate studies at <b>Birla Institute of Technology, Mesra</b>, where I worked under the guidance of <b>Dr. Raju Poddar and Dr. Vijay Nath</b> on Deep learning applications across domains leading to multiple international conference publications, and was also a recipient of <b>G.P Birla Scholarship</b> for REU program at <b>Northeastern University</b></p>
                 </div>
@@ -1146,6 +1296,10 @@
                         <div class="skill-item">
                             <i class="fas fa-check-circle"></i>
                             <span>CSS</span>
+                        </div>
+                        <div class="skill-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>TypeScript</span>
                         </div>
                     </div>
                 </div>
@@ -1239,11 +1393,23 @@
                         </div>
                         <div class="skill-item">
                             <i class="fas fa-check-circle"></i>
-                            <span>Jenkins</span>
+                            <span>Snowflake</span>
+                        </div>
+                        <div class="skill-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Terraform</span>
+                        </div>
+                        <div class="skill-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Github Workflows</span>
                         </div>
                         <div class="skill-item">
                             <i class="fas fa-check-circle"></i>
                             <span>Airflow</span>
+                        </div>
+                        <div class="skill-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Next.js</span>
                         </div>
                     </div>
                 </div>
@@ -1264,12 +1430,21 @@
                         <span class="skill-tag">Matplotlib</span>
                         <span class="skill-tag">SciKit-Learn</span>
                         <span class="skill-tag">PySpark</span>
+                        <span class="skill-tag">React.js</span>
+                        <span class="skill-tag">Ragas</span>
+                        <span class="skill-tag">Langsmith</span>
+                        <span class="skill-tag">Langgraph</span>
+                        <span class="skill-tag">Langfuse</span>
                     </div>
                 </div>
                 
                 <div class="skill-category">
                     <h3><i class="fas fa-brain"></i> DOMAINS</h3>
                     <div class="skill-items">
+                        <div class="skill-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Artificial Intelligence</span>
+                        </div>
                         <div class="skill-item">
                             <i class="fas fa-check-circle"></i>
                             <span>Decision Science</span>
@@ -1339,18 +1514,39 @@
             <p>A summary of my professional journey and research experiences</p>
         </div>
         
+        <!-- NEW EXPERIENCE - Template for adding new content -->
+        <div class="experience-item">
+            <div class="experience-image">
+                <img src="assets/alti.png" alt="Company Logo" style="transform: scale(1.2);">
+            </div>
+            <div class="experience-content">
+                <h3 class="experience-title">ASSOCIATE AI ENGINEER</h3>
+                <div class="experience-company">ALTIMETRIK</div>
+                <div class="experience-duration">June 2025 - Present</div>
+                <div class="experience-location">Southfield, MI</div>
+                <p style="font-size: 14px; color: #d1d5db; margin-bottom: 10px; font-style: italic;">Full-time: Summer/Winter breaks and Post Graduation; Part-time: Academic Terms</p>
+                <div class="experience-achievements">
+                    <ul>
+                        <li>Developed Full-Stack Agentic AI Database system using LangGraph for over 5M+ records across Data Warehouse with Next.js front-end and Knowledge Graph reinforced response routing, resulting in 8% improvement across retrieval metrics</li>
+                        <li>Implemented Redis-backed session-aware ontology caching system using ElastiCache and AWS Lambda reducing query response time by 3x while achieving context recall and relevancy of 0.99 across multi-session Agentic AI systems</li>
+                        <li>Automated CI/CD pipelines with Github Actions and set up observability framework using Langsmith and Ragas for monitoring and evaluation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
         <div class="experience-item">
             <div class="experience-image">
                 <img src="assets\UC_Riverside_Highlanders_logo.png" alt="UCR Logo">
             </div>
             <div class="experience-content">
                 <h3 class="experience-title">STUDENT RESEARCHER</h3>
-                <div class="experience-company">BOURNS COLLEGE OF ENGINEERING</div>
-                <div class="experience-duration">January 2025 - Present</div>
+                <div class="experience-company">BOURNS COLLEGE OF ENGINEERING - <a href="https://vcg.ece.ucr.edu/" target="_blank" style="color: #60a5fa; text-decoration: none;">Vision and Learning Group</a></div>
+                <div class="experience-duration">January 2025 - March 2026</div>
                 <div class="experience-location">Riverside, CA</div>
                 <div class="experience-achievements">
                     <ul>
-                        <li>Researching Uncertainty Quantification in 3D Vision under Prof. Amit K. Roy-Chowdhury, developing novel methods to evaluate epistemic and aleatoric uncertainty in 3D reconstruction with occlusions, integrating uncertainty as a learning parameter to enhance model reliability.</li>
+                        <li>Researching Deepfake detection under network induced corruptions over live communication channels in production environments under Prof. Amit K. Roy-Chowdhury, developing novel methods to ensure accurate detection of deepfakes to enhance model reliability under real-world scenarios.</li>
                         <li>Advancing Safety Alignment in Vision-Language Models, designing robust defenses against adversarial attacks embedded in both images and textual inputs, ensuring secure and reliable AI performance.</li>
                         <li>Collaborating with the Collaborative Intelligence Systems Lab under Prof. Hang Qiu to develop a benchmark dataset for multi-agent perception in autonomous vehicles, facilitating enhanced coordination and decision-making in real-world driving scenarios.</li>
                     </ul>
@@ -1361,6 +1557,7 @@
         <div class="experience-item">
             <div class="experience-image">
                 <img src="assets\axio.png" alt="AXIO Logo">
+                <img src="assets\amz.png" alt="Amazon Logo">
             </div>
             <div class="experience-content">
                 <h3 class="experience-title">DATA SCIENTIST</h3>
@@ -1469,6 +1666,25 @@
                 <i class="fas fa-scroll"></i>
                 <h2>Publications</h2>
                 <p>My research papers and academic contributions</p>
+            </div>
+            
+            <!-- NEW PUBLICATION - Template for adding new content -->
+            <div class="publication-item">
+                <div class="publication-image">
+                    <img src="assets/image.png" alt="DeFND Publication">
+                </div>
+                <div class="publication-content">
+                    <h3 class="publication-title">DeFND: A Benchmark Video Dataset for Deepfake Detection under Network Degradation</h3>
+                    <div class="publication-authors"><b>Jha, S.</b>, Nag, S., Liu, Z., Kundu, R., Bachu, S., Niloy, F. F., Tan, Z., Qian, Z., Krishnamurthy, S., & Roy-Chowdhury, A.</div>
+                    <div class="publication-venue">Under Review - ECCV 2026</div>
+                    <div class="publication-date">2026</div>
+                    <div class="publication-abstract">
+                        <p>This paper presents DeFND, a comprehensive benchmark dataset for evaluating deepfake detection methods under network-induced degradations in real-world production environments.</p>
+                    </div>
+                    <div class="publication-links">
+                        <a href="#" class="publication-link"><i class="fas fa-file-alt"></i> Under Review</a>
+                    </div>
+                </div>
             </div>
             
             <!-- Publication 1 -->
@@ -1957,6 +2173,12 @@
                 <div class="logo-item">
                     <img src="assets\UC_Riverside_Highlanders_logo.png" alt="Company 5">
                 </div>
+                <div class="logo-item">
+                    <img src="assets\alti.png" alt="Altimetrik">
+                </div>
+                <div class="logo-item">
+                    <img src="assets\amz.png" alt="Amazon">
+                </div>
             </div>
         </div>
     </section>
@@ -2047,72 +2269,137 @@
                 });
             });
 
-            (function() {
-                // DOM elements
-                const video = document.getElementById('background-video');
-                const image = document.getElementById('background-image');
-                
-                function setupBackgrounds() {
-                    // Use a simpler detection for mobile devices based only on screen width
-                    const isMobile = window.innerWidth <= 768;
-                    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+            // Job Status Typing Effect
+            const jobStatusElement = document.getElementById('job-status-text');
+            const jobStatusCursor = document.querySelector('.job-status-cursor');
+            const jobStatusText = "Actively seeking<br>Full-time positions";
+            let jobCharIndex = 0;
+            let displayText = '';
+
+            function typeJobStatus() {
+                if (jobCharIndex < jobStatusText.length) {
+                    const char = jobStatusText.charAt(jobCharIndex);
                     
-                    if (isMobile || isTablet) {
-                        // Mobile or tablet device detected
-                        console.log('Mobile or tablet detected - showing image background');
-                        
-                        // Hide video, show image
-                        if (video) video.style.display = 'none';
-                        if (image) image.style.display = 'block';
+                    // Handle <br> tag
+                    if (char === '<' && jobStatusText.substr(jobCharIndex, 4) === '<br>') {
+                        displayText += '<br>';
+                        jobStatusElement.innerHTML = displayText;
+                        jobCharIndex += 4;
                     } else {
-                        // Desktop device detected
-                        console.log('Desktop detected - showing video background');
-                        
-                        // Show video, hide image
-                        if (image) image.style.display = 'none';
-                        if (video) {
-                            video.style.display = 'block';
-                            
-                            // Try to play the video
-                            try {
-                                const playPromise = video.play();
-                                
-                                if (playPromise !== undefined) {
-                                    playPromise.catch(error => {
-                                        console.error('Video autoplay failed:', error);
-                                        // Fallback to image if video fails
-                                        video.style.display = 'none';
-                                        image.style.display = 'block';
-                                    });
-                                }
-                                
-                                // Add 6-second loop for the video
-                                video.addEventListener('timeupdate', function() {
-                                    if (video.currentTime > 6) {
-                                        video.currentTime = 0;
-                                    }
-                                });
-                            } catch (err) {
-                                console.error('Error playing video:', err);
-                                // Fallback to image on error
-                                video.style.display = 'none';
-                                image.style.display = 'block';
-                            }
-                        }
+                        displayText += char;
+                        jobStatusElement.innerHTML = displayText;
+                        jobCharIndex++;
                     }
-                }
-                
-                // Initial setup when DOM is fully loaded
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', setupBackgrounds);
+                    setTimeout(typeJobStatus, 80);
                 } else {
-                    // DOM already loaded
-                    setupBackgrounds();
+                    // Hide cursor after typing is complete
+                    setTimeout(() => {
+                        if (jobStatusCursor) {
+                            jobStatusCursor.style.display = 'none';
+                        }
+                    }, 1000);
                 }
+            }
+
+            // Start job status typing after a delay
+            setTimeout(typeJobStatus, 1000);
+
+            // Rotating Role Text Effect
+            const roleTextElement = document.getElementById('role-text');
+            const roles = [
+                'AI Engineer',
+                'Machine Learning Engineer',
+                'Data Scientist',
+                'Software Developer',
+                'Computer Vision Researcher',
+                'Generative AI Engineer'
+            ];
+            let currentRoleIndex = 0;
+
+            function showNextRole() {
+                // Update text content and trigger animation
+                roleTextElement.textContent = roles[currentRoleIndex];
                 
-                // Handle window resize
-                window.addEventListener('resize', setupBackgrounds);
-            })();
+                // Force reflow to restart animation
+                roleTextElement.style.animation = 'none';
+                roleTextElement.offsetHeight; // Trigger reflow
+                roleTextElement.style.animation = 'fadeInOut 2s ease-in-out';
+                
+                // Move to next role
+                currentRoleIndex = (currentRoleIndex + 1) % roles.length;
+            }
+
+            // Start the rotation
+            showNextRole();
+            setInterval(showNextRole, 2000); // Change every 2 seconds
+
+            // Neural Network Background Animation
+            const canvas = document.getElementById('neural-background');
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const nodes = [];
+            const nodeCount = 50;
+
+            // Initialize nodes
+            for (let i = 0; i < nodeCount; i++) {
+                nodes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                });
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(2, 8, 23, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Update and draw nodes
+                nodes.forEach((node, i) => {
+                    node.x += node.vx;
+                    node.y += node.vy;
+
+                    // Wrap around edges
+                    if (node.x < 0) node.x = canvas.width;
+                    if (node.x > canvas.width) node.x = 0;
+                    if (node.y < 0) node.y = canvas.height;
+                    if (node.y > canvas.height) node.y = 0;
+
+                    // Draw node
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.6)';
+                    ctx.fill();
+
+                    // Draw connections
+                    nodes.slice(i + 1).forEach(otherNode => {
+                        const distance = Math.sqrt(
+                            Math.pow(node.x - otherNode.x, 2) + Math.pow(node.y - otherNode.y, 2)
+                        );
+
+                        if (distance < 150) {
+                            ctx.beginPath();
+                            ctx.moveTo(node.x, node.y);
+                            ctx.lineTo(otherNode.x, otherNode.y);
+                            ctx.strokeStyle = `rgba(59, 130, 246, ${0.3 - distance / 500})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                        }
+                    });
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
 
             // Scroll to top functionality
             scrollTopBtn.addEventListener('click', function() {

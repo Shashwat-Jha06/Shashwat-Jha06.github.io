@@ -1,0 +1,14 @@
+# Template files - exclude these
+AI Engineer Portfolio Website (Community).zip
+new theme/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
